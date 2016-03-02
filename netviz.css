@@ -1,0 +1,17 @@
+.node {
+  stroke: #fff;
+  stroke-width: 2px;
+}
+
+.edge {
+  stroke: #2E2E2E;
+  stroke-width: 2px;
+}
+
+.node-label {
+  stroke: #323232;
+  font-family: "Lucida Grande", "Droid Sans", Arial, Helvetica, sans-serif;
+  font-weight: normal;
+  stroke-width: .5;
+  font-size: 14px;
+}
