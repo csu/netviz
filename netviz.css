@@ -15,3 +15,9 @@
   stroke-width: .5;
   font-size: 14px;
 }
+
+path {
+  fill: none;
+  stroke: #000;
+  stroke-width: 1px;
+}
