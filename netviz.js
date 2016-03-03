@@ -203,7 +203,7 @@ var convertRouterId = function(agentId) {
               }
             })
             .ease("quad")
-            .duration(animationDuration)
+            .duration(animationDuration * 1.5)
             .each("end", function() {
               d3.select(this).remove();
             });
