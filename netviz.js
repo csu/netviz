@@ -38,13 +38,13 @@ var convertRouterId = function(agentId) {
     var animationQueue = [];
     var animationTimer = null;
 
-    this.addNode = function(id) {
+    this.addNode = function(id, label) {
       if (id in existingNodes) {
         return;
       }
       existingNodes[id] = true;
       existingEdges[id] = [];
-      nodes.push({"id": id});
+      nodes.push({"id": id, "label": label});
       updateGraph();
     };
 
@@ -246,34 +246,26 @@ var convertRouterId = function(agentId) {
           .attr("class", "edge");
       
       edge.append("title")
-          .text(function(d) {
-            return d.value;
-          });
+          .text(function(d) { return d.value; });
       
       edge.exit().remove();
 
       var node = svg.selectAll("g.node")
-                    .data(nodes, function(d) {
-                      return d.id;
-                    });
+                    .data(nodes, function(d) { return d.id; });
 
       var nodeEnter = node.enter().append("g")
                                   .attr("class", "node");
 
       nodeEnter.append("svg:circle")
           .attr("r", 12)
-          .attr("id", function(d) {
-            return "Node;" + d.id;
-          })
+          .attr("id", function(d) { return "Node;" + d.id; })
           .attr("class", "node");
 
       nodeEnter.append("svg:text")
           .attr("class", "node-label")
           .attr("x", 15)
           .attr("y", ".40em")
-          .text(function(d) {
-            return d.id;
-          });
+          .text(function(d) { return d.label; });
 
       node.exit().remove();
 
@@ -315,21 +307,23 @@ var convertRouterId = function(agentId) {
       // console.log(entry);
 
       // draw the node, if it doesn't exist already
-      var source = convertRouterId(entry.router);
-      graph.addNode(source[0] + "-" + source[1]);
+      var source = entry.router;
+      var sourceLabel = convertRouterId(source);
+      graph.addNode(entry.router, sourceLabel[0] + "-" + sourceLabel[1]);
 
       // if it's a packet being sent
       if (entry.data.event === 'sending') {
         // add the destination node if it doesn't exist
-        var dest = convertRouterId(entry.router);
-        graph.addNode(dest[0] + "-" + dest[1]);
+        var dest = entry.data.to;
+        var destLabel = convertRouterId(dest);
+        graph.addNode(entry.data.to, destLabel[0] + "-" + destLabel[1]);
 
         graph.addEdge(source, dest, 20);
         redrawNodes();
 
         // draw the packet for the cell type
-        var color = entry.data.cell_type in packetColors ? packetColors[entry.data.cell_type] : defaultColor;
-        // console.log("sending: " + source + ", " + dest + ", " + color);
+        var color = entry.data.cell_type in packetColors
+                    ? packetColors[entry.data.cell_type] : defaultColor;
         graph.addPacket(source, dest, entry.data.cell_type, color);
         redrawNodes();
       }
