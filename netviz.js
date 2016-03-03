@@ -110,7 +110,7 @@
 
     var processAnimation = function() {
       var next = animationQueue.shift();
-      animatePacket(next.source, next.target, next.color);
+      animatePacket(next);
       if (animationQueue.length === 0) {
         clearInterval(animationTimer);
         animationTimer = null;
@@ -118,10 +118,11 @@
     }
 
     // throttle animations using a queue
-    this.addPacket = function(source, target, color) {
+    this.addPacket = function(source, target, label, color) {
       animationQueue.push({
         source: source,
         target: target,
+        label: label,
         color: color,
       });
       if (animationTimer === null) {
@@ -129,54 +130,67 @@
       }
     }
 
-    var animatePacket = function(source, target, color) {
-      // handle self loop
-      if (source === target) {
-        var n1 = findNode(source);
+    var animatePacket = function(packet) {
+      var elems = [];
+      elems.push(svg.append("text")
+          .attr("x", n1.x + 25)
+          .attr("y", n1.y + 10)
+          .text(packet.label));
 
-        var packet = svg.append("rect")
+      // handle self loop
+      if (packet.source === packet.target) {
+        var n1 = findNode(packet.source);
+
+        elems.push(
+          svg.append("rect")
             .attr("x", n1.x)
             .attr("y", n1.y)
             .attr("width", 7)
             .attr("height", 7)
-            .style("fill", color);
-        packet.transition()
-            .attrTween("x", function(d, i, a) {
-              return function(t) {
-                return n1.x + (50 * Math.cos(2*Math.PI * t)) - 50;
-              }
-            })
-            .attrTween("y", function(d, i, a) {
-              return function(t) {
-                return n1.y + (50 * Math.sin(2*Math.PI * t));
-              }
-            })
-            .ease("quad")
-            .duration(animationDuration)
-            .each("end", function() {
-              d3.select(this).remove();
-            });
+            .style("fill", packet.color));
+        
+        elems.forEach(function(item) {
+          item.transition()
+              .attrTween("x", function(d, i, a) {
+                return function(t) {
+                  return n1.x + (50 * Math.cos(2*Math.PI * t)) - 50;
+                }
+              })
+              .attrTween("y", function(d, i, a) {
+                return function(t) {
+                  return n1.y + (50 * Math.sin(2*Math.PI * t));
+                }
+              })
+              .ease("quad")
+              .duration(animationDuration)
+              .each("end", function() {
+                d3.select(this).remove();
+              });
+        });
 
         return;
       }
 
-      var n1 = findNode(source);
-      var n2 = findNode(target);
+      var n1 = findNode(packet.source);
+      var n2 = findNode(packet.target);
 
-      var packet = svg.append("rect")
+      elems.push(svg.append("rect")
           .attr("x", n1.x)
           .attr("y", n1.y)
           .attr("width", 7)
           .attr("height", 7)
-          .style("fill", color);
-      packet.transition()
+          .style("fill", packet.color));
+
+      elems.forEach(function(item) {
+        item.transition()
           .attr("x", n2.x)
           .attr("y", n2.y)
           .ease("quad")
           .duration(animationDuration)
           .each("end", function() {
             d3.select(this).remove();
-          });
+        });
+      });
     }
 
     var findNode = function(id) {
@@ -310,7 +324,7 @@
         // draw the packet for the cell type
         var color = entry.data.cell_type in packetColors ? packetColors[entry.data.cell_type] : defaultColor;
         // console.log("sending: " + source + ", " + dest + ", " + color);
-        graph.addPacket(source, dest, color);
+        graph.addPacket(source, dest, entry.data.cell_type, color);
         redrawNodes();
       }
     });
