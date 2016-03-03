@@ -189,7 +189,7 @@ var convertRouterId = function(agentId) {
               }
             })
             .ease("quad")
-            .duration(animationDuration)
+            .duration(animationDuration * 1.5)
             .each("end", function() {
               d3.select(this).remove();
             });
@@ -227,24 +227,38 @@ var convertRouterId = function(agentId) {
             .attr("height", 7)
             .style("fill", packet.color));
         
-        elems.forEach(function(item) {
-          item.transition()
-              .attrTween("x", function(d, i, a) {
-                return function(t) {
-                  return n1.x + (50 * Math.cos(2*Math.PI * t)) - 50;
-                }
-              })
-              .attrTween("y", function(d, i, a) {
-                return function(t) {
-                  return n1.y + (50 * Math.sin(2*Math.PI * t));
-                }
-              })
-              .ease("quad")
-              .duration(animationDuration)
-              .each("end", function() {
-                d3.select(this).remove();
-              });
-        });
+        elems[0].transition() // label
+            .attrTween("x", function(d, i, a) {
+              return function(t) {
+                return n1.x + (50 * Math.cos(2*Math.PI * t)) - 50 + 10;
+              }
+            })
+            .attrTween("y", function(d, i, a) {
+              return function(t) {
+                return n1.y + (50 * Math.sin(2*Math.PI * t)) + 10;
+              }
+            })
+            .ease("quad")
+            .duration(animationDuration)
+            .each("end", function() {
+              d3.select(this).remove();
+            });
+        elems[1].transition() // rect
+            .attrTween("x", function(d, i, a) {
+              return function(t) {
+                return n1.x + (50 * Math.cos(2*Math.PI * t)) - 50;
+              }
+            })
+            .attrTween("y", function(d, i, a) {
+              return function(t) {
+                return n1.y + (50 * Math.sin(2*Math.PI * t));
+              }
+            })
+            .ease("quad")
+            .duration(animationDuration)
+            .each("end", function() {
+              d3.select(this).remove();
+            });
 
         return;
       }
@@ -258,15 +272,21 @@ var convertRouterId = function(agentId) {
           .attr("height", 7)
           .style("fill", packet.color));
 
-      elems.forEach(function(item) {
-        item.transition()
-          .attr("x", n2.x)
-          .attr("y", n2.y)
-          .ease("quad")
-          .duration(animationDuration)
-          .each("end", function() {
-            d3.select(this).remove();
-        });
+      elems[0].transition() // label
+        .attr("x", n2.x + 10)
+        .attr("y", n2.y + 10)
+        .ease("quad")
+        .duration(animationDuration)
+        .each("end", function() {
+          d3.select(this).remove();
+      });
+      elems[1].transition() // rect
+        .attr("x", n2.x)
+        .attr("y", n2.y)
+        .ease("quad")
+        .duration(animationDuration)
+        .each("end", function() {
+          d3.select(this).remove();
       });
     }
 
