@@ -26,6 +26,7 @@ var convertRouterId = function(agentId) {
   var defaultColor = "black";
 
   var animationDuration = 1500;
+  var animationMultiplier = 1.2;
   var animationThrottleDelay = 500;
 
   var w = 1200,
@@ -189,7 +190,7 @@ var convertRouterId = function(agentId) {
               }
             })
             .ease("quad")
-            .duration(animationDuration * 1.5)
+            .duration(animationDuration * animationMultiplier)
             .each("end", function() {
               d3.select(this).remove();
             });
@@ -203,7 +204,7 @@ var convertRouterId = function(agentId) {
               }
             })
             .ease("quad")
-            .duration(animationDuration * 1.5)
+            .duration(animationDuration * animationMultiplier)
             .each("end", function() {
               d3.select(this).remove();
             });
