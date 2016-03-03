@@ -18,6 +18,10 @@
   var defaultColor = "black";
 
   var animationDuration = 1500;
+  var animationThrottleDelay = 500;
+
+  var w = 1200,
+      h = 600;
 
   // Returns an attrTween for translating along the specified path element.
   function translateAlong(path) {
@@ -130,8 +134,23 @@
         color: color,
       });
       if (animationTimer === null) {
-        animationTimer = setInterval(processAnimation, 200);
+        animationTimer = setInterval(processAnimation, animationThrottleDelay);
       }
+    }
+
+
+    var translateFn = function() {
+      return function(d, i, a) {
+        return function(t) {
+          var t_offset = d.get('offset');
+          var rotation_radius = 50;
+          var t_angle = (2 * Math.PI) * t;
+          var t_x = rotation_radius * Math.cos(t_angle);
+          var t_y = rotation_radius * Math.sin(t_angle);
+
+          return "translate(" + (t_offset + t_x) + "," + (t_offset + t_y) + ")";
+        };
+      };
     }
 
     var animatePacket = function(source, target, color) {
@@ -139,19 +158,16 @@
       if (source === target) {
         var n1 = findNode(source);
 
-        var points = [
-          // [n1.x, n1.y],
-          [n1.x+50, n1.y],
-          [n1.x+50, n1.y+50],
-          [n1.x, n1.y+50],
-          // [n1.x, n1.y],
-        ];
+        // var points = [
+        //   [n1.x, n1.y],
+        //   [n1.x, n1.y],
+        // ];
 
-        var path = svg.append("path")
-            .data([points])
-            .attr("d", d3.svg.line()
-            .tension(0) // Catmull–Rom
-            .interpolate("cardinal-closed"));
+        // var path = svg.append("path")
+        //     .data([points])
+        //     .attr("d", d3.svg.line()
+        //     .tension(0) // Catmull–Rom
+        //     .interpolate("cardinal-closed"));
 
         var packet = svg.append("rect")
             .attr("x", n1.x)
@@ -160,12 +176,13 @@
             .attr("height", 7)
             .style("fill", color);
         packet.transition()
-            .attrTween("transform", translateAlong(path.node()))
+            // .attrTween("transform", translateAlong(path.node()))
             .ease("quad")
             .duration(animationDuration)
+            .attrTween("transform", translateFn())
             .each("end", function() {
               d3.select(this).remove();
-              path.remove();
+              // path.remove();
             });
 
         return;
@@ -203,9 +220,6 @@
         }
       }
     };
-
-    var w = 1200,
-        h = 600;
 
     var color = d3.scale.category10();
 
