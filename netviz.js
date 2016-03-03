@@ -1,4 +1,22 @@
 (function() {
+  var packetColors = {
+    "Create": "blue",
+    "Created": "green",
+    "Open": "blue",
+    "Opened": "green",
+
+    "Relay Begin": "blue",
+    "Relay Data": "purple",
+    "Relay End": "orange",
+    "Relay Connected": "green",
+    "Relay Extend": "blue",
+    "Relay Extended": "green",
+    "Relay Begin Failed": "red",
+    "Relay Extend Failed": "red",
+  }
+
+  var defaultColor = "black";
+
   // Returns an attrTween for translating along the specified path element.
   function translateAlong(path) {
     var l = path.getTotalLength();
@@ -12,12 +30,14 @@
 
   function Graph() {
     var existingNodes = {};
+    var existingEdges = {};
 
     this.addNode = function(id) {
       if (id in existingNodes) {
         return;
       }
       existingNodes[id] = true;
+      existingEdges[id] = [];
       nodes.push({"id": id});
       updateGraph();
     };
@@ -38,24 +58,45 @@
 
       nodes.splice(findEdgeIndex(id), 1);
       delete existingNodes[id];
+      delete existingEdges[id];
       updateGraph();
     };
 
     this.removeEdge = function(source, target) {
-      for (var i = 0; i < edges.length; i++) {
-        if (edges[i].source.id == source && edges[i].target.id == target) {
-          edges.splice(i, 1);
-          updateGraph();
-          break;
+      if (!(source in existingNodes)) {
+        var idx = existingEdges[source].indexOf(target);
+        if (index > -1) {
+          existingEdges[source].splice(idx, 1);
+
+          for (var i = 0; i < edges.length; i++) {
+            if (edges[i].source.id == source && edges[i].target.id == target) {
+              edges.splice(i, 1);
+              updateGraph();
+              break;
+            }
+          }
         }
       }
     };
 
     this.addEdge = function(source, target, value) {
+      if (!(source in existingNodes) || !(target in existingNodes)) {
+        return;
+      }
+
+      // check if edge already exists
+      var idx = existingEdges[source].indexOf(target);
+      if (index > -1) {
+        return;
+      }
+
+      existingEdges[source].push(target);
+
       edges.push({
         "source": findEdge(source),
         "target": findEdge(target),
         "value": value});
+
       updateGraph();
     };
 
@@ -130,7 +171,7 @@
     };
 
     var w = 1200,
-        h = 800;
+        h = 600;
 
     var color = d3.scale.category10();
 
@@ -231,17 +272,21 @@
     var graph = new Graph("#network");
 
     socket.on('event', function(entry) {
-      console.log(entry);
+      // console.log(entry);
+
       // draw the node, if it doesn't exist already
-      graph.addNode("" + entry.router);
+      var source = "" + entry.router;
+      graph.addNode(source);
 
       // if it's a packet being sent
       if (entry.data.event === 'sending') {
         // add the destination node if it doesn't exist
-        graph.addNode("" + entry.data.to);
+        var dest = "" + entry.data.to;
+        graph.addNode(dest);
+        graph.addEdge(source, dest, 20);
 
         // draw the packet for the cell type
-        graph.addPacket("" + entry.router, "" + entry.data.to, "blue");
+        graph.addPacket(source, dest, entry.data.cell_type in packetColors ? packetColors[entry.data.cell_type] : defaultColor);
       }
 
       redrawNodes();
