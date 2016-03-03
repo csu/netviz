@@ -23,17 +23,6 @@
   var w = 1200,
       h = 600;
 
-  // Returns an attrTween for translating along the specified path element.
-  function translateAlong(path) {
-    var l = path.getTotalLength();
-    return function(d, i, a) {
-      return function(t) {
-        var p = path.getPointAtLength(t * l);
-        return "translate(" + p.x + "," + p.y + ")";
-      };
-    };
-  }
-
   function Graph() {
     var existingNodes = {};
     var existingEdges = {};
@@ -91,9 +80,9 @@
     };
 
     this.addEdge = function(source, target, value) {
-      console.log("adding: " + source + ", " + target);
-      console.log(existingNodes);
-      console.log(existingEdges);
+      // console.log(existingNodes);
+      // console.log(existingEdges);
+
       if (!(source in existingNodes) || !(target in existingNodes)) {
         return;
       }
@@ -103,6 +92,8 @@
       if (idx > -1) {
         return;
       }
+
+      // console.log("adding: " + source + ", " + target);
 
       existingEdges[source].push(target);
       existingEdges[target].push(source);
@@ -138,36 +129,10 @@
       }
     }
 
-
-    var translateFn = function() {
-      return function(d, i, a) {
-        return function(t) {
-          var t_offset = d.get('offset');
-          var rotation_radius = 50;
-          var t_angle = (2 * Math.PI) * t;
-          var t_x = rotation_radius * Math.cos(t_angle);
-          var t_y = rotation_radius * Math.sin(t_angle);
-
-          return "translate(" + (t_offset + t_x) + "," + (t_offset + t_y) + ")";
-        };
-      };
-    }
-
     var animatePacket = function(source, target, color) {
       // handle self loop
       if (source === target) {
         var n1 = findNode(source);
-
-        // var points = [
-        //   [n1.x, n1.y],
-        //   [n1.x, n1.y],
-        // ];
-
-        // var path = svg.append("path")
-        //     .data([points])
-        //     .attr("d", d3.svg.line()
-        //     .tension(0) // Catmull–Rom
-        //     .interpolate("cardinal-closed"));
 
         var packet = svg.append("rect")
             .attr("x", n1.x)
@@ -176,13 +141,20 @@
             .attr("height", 7)
             .style("fill", color);
         packet.transition()
-            // .attrTween("transform", translateAlong(path.node()))
+            .attrTween("x", function(d, i, a) {
+              return function(t) {
+                return n1.x + (50 * Math.cos(2*Math.PI * t)) - 50;
+              }
+            })
+            .attrTween("y", function(d, i, a) {
+              return function(t) {
+                return n1.y + (50 * Math.sin(2*Math.PI * t));
+              }
+            })
             .ease("quad")
             .duration(animationDuration)
-            .attrTween("transform", translateFn())
             .each("end", function() {
               d3.select(this).remove();
-              // path.remove();
             });
 
         return;
