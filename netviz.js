@@ -130,6 +130,11 @@ var convertRouterId = function(agentId) {
         clearInterval(animationTimer);
         animationTimer = null;
       }
+      else if (animationQueue.length > 50) {
+        // empty the queue quickly
+        clearInterval(animationTimer);
+        animationTimer = setInterval(processAnimation, 100);
+      }
     }
 
     // throttle animations using a queue
