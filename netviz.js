@@ -118,7 +118,14 @@ var convertRouterId = function(agentId) {
 
     var processAnimation = function() {
       var next = animationQueue.shift();
-      animatePacket(next);
+      switch (next.type) {
+        case 'packet':
+          animatePacket(next);
+          break;
+        case 'error':
+          displayError(next);
+          break;
+      }
       if (animationQueue.length === 0) {
         clearInterval(animationTimer);
         animationTimer = null;
@@ -132,10 +139,69 @@ var convertRouterId = function(agentId) {
         target: target,
         label: label,
         color: color,
+        type: 'packet',
       });
       if (animationTimer === null) {
         animationTimer = setInterval(processAnimation, animationThrottleDelay);
       }
+    }
+
+    this.addError = function(source, label, color) {
+      animationQueue.push({
+        source: source,
+        label: label,
+        color: color,
+        type: 'error',
+      });
+      if (animationTimer === null) {
+        animationTimer = setInterval(processAnimation, animationThrottleDelay);
+      }
+    }
+
+    var displayError = function(err) {
+      var n1 = findNode(err.source);
+
+      var elems = [];
+      elems.push(svg.append("text")
+          .attr("x", n1.x + 20)
+          .attr("y", n1.y + 15)
+          .text(err.label));
+      elems.push(
+        svg.append("rect")
+          .attr("x", n1.x)
+          .attr("y", n1.y)
+          .attr("width", 10)
+          .attr("height", 10)
+          .style("fill", err.color));
+        
+      elems[0].transition()
+            .attrTween("y", function(d, i, a) {
+              return function(t) {
+                if (t < 0.5) {
+                  return n1.y - (75 * t) + 10;
+                }
+                return n1.y - (75 * (1-t)) + 10;
+              }
+            })
+            .ease("quad")
+            .duration(animationDuration)
+            .each("end", function() {
+              d3.select(this).remove();
+            });
+      elems[1].transition()
+            .attrTween("y", function(d, i, a) {
+              return function(t) {
+                if (t < 0.5) {
+                  return n1.y - (75 * t);
+                }
+                return n1.y - (75 * (1-t));
+              }
+            })
+            .ease("quad")
+            .duration(animationDuration)
+            .each("end", function() {
+              d3.select(this).remove();
+            });
     }
 
     var animatePacket = function(packet) {
@@ -304,8 +370,6 @@ var convertRouterId = function(agentId) {
     var graph = new Graph("#network");
 
     socket.on('event', function(entry) {
-      // console.log(entry);
-
       // draw the node, if it doesn't exist already
       var source = entry.router;
       var sourceLabel = convertRouterId(source);
@@ -326,6 +390,17 @@ var convertRouterId = function(agentId) {
                     ? packetColors[entry.data.cell_type] : defaultColor;
         graph.addPacket(source, dest, entry.data.cell_type, color);
         redrawNodes();
+      }
+    });
+
+    socket.on('error', function(entry) {
+      // draw the node, if it doesn't exist already
+      var source = entry.router;
+      var sourceLabel = convertRouterId(source);
+      graph.addNode(entry.router, sourceLabel[0] + "-" + sourceLabel[1]);
+
+      if ('error' in entry.data) {
+        graph.addError(source, entry.data.error, "red");
       }
     });
   }
