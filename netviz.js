@@ -131,6 +131,7 @@
     }
 
     var animatePacket = function(packet) {
+      var n1 = findNode(packet.source);
       var elems = [];
       elems.push(svg.append("text")
           .attr("x", n1.x + 25)
@@ -139,8 +140,6 @@
 
       // handle self loop
       if (packet.source === packet.target) {
-        var n1 = findNode(packet.source);
-
         elems.push(
           svg.append("rect")
             .attr("x", n1.x)
@@ -171,7 +170,6 @@
         return;
       }
 
-      var n1 = findNode(packet.source);
       var n2 = findNode(packet.target);
 
       elems.push(svg.append("rect")
