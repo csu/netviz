@@ -1,19 +1,27 @@
-(function() {
-  var packetColors = {
-    "Create": "blue",
-    "Created": "green",
-    "Open": "blue",
-    "Opened": "green",
+/* Tor61-specific */
+var packetColors = {
+  "Create": "blue",
+  "Created": "green",
+  "Open": "blue",
+  "Opened": "green",
 
-    "Relay Begin": "blue",
-    "Relay Data": "purple",
-    "Relay End": "orange",
-    "Relay Connected": "green",
-    "Relay Extend": "blue",
-    "Relay Extended": "green",
-    "Relay Begin Failed": "red",
-    "Relay Extend Failed": "red",
-  }
+  "Relay Begin": "blue",
+  "Relay Data": "purple",
+  "Relay End": "orange",
+  "Relay Connected": "green",
+  "Relay Extend": "blue",
+  "Relay Extended": "green",
+  "Relay Begin Failed": "red",
+  "Relay Extend Failed": "red",
+}
+
+var convertRouterId = function(agentId) {
+  var groupId = agentId >>> 16;
+  var routerId = agentId & ((~0) >>> 16);
+  return [groupId, routerId];
+};
+
+(function() {
 
   var defaultColor = "black";
 
@@ -134,8 +142,8 @@
       var n1 = findNode(packet.source);
       var elems = [];
       elems.push(svg.append("text")
-          .attr("x", n1.x + 25)
-          .attr("y", n1.y + 10)
+          .attr("x", n1.x + 30)
+          .attr("y", n1.y + 15)
           .text(packet.label));
 
       // handle self loop
@@ -307,14 +315,14 @@
       // console.log(entry);
 
       // draw the node, if it doesn't exist already
-      var source = "" + entry.router;
-      graph.addNode(source);
+      var source = convertRouterId(entry.router);
+      graph.addNode(source[0] + "-" + source[1]);
 
       // if it's a packet being sent
       if (entry.data.event === 'sending') {
         // add the destination node if it doesn't exist
-        var dest = "" + entry.data.to;
-        graph.addNode(dest);
+        var dest = convertRouterId(entry.router);
+        graph.addNode(dest[0] + "-" + dest[1]);
 
         graph.addEdge(source, dest, 20);
         redrawNodes();
