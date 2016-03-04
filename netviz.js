@@ -1,3 +1,10 @@
+/*
+  netviz
+  Christopher Su
+*/
+
+// TODO: Abstract out animation of shapes and text from Graph (keep queue though)
+
 /* Tor61-specific */
 var packetColors = {
   "Create": "blue",
