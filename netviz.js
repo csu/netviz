@@ -21,6 +21,7 @@ var convertRouterId = function(agentId) {
   return [groupId, routerId];
 };
 
+// TODO: add control panels to change these settings on-the-fly
 var displayReceived = true;
 
 (function() {
