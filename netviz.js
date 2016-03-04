@@ -21,17 +21,34 @@ var convertRouterId = function(agentId) {
   return [groupId, routerId];
 };
 
-// TODO: add control panels to change these settings on-the-fly
 var displayReceived = true;
+
+var animationDuration = 1500;
+var errorDurationMultiplier = 1;
+var receivedDurationMultiplier = 0.6;
+var animationThrottleDelay = 500;
+
+document.getElementById('animDuration').value = animationDuration;
+document.getElementById('animThrottleDelay').value = animationThrottleDelay;
+document.getElementById('showReceived').checked = displayReceived;
+
+function setAnimDuration() {
+  var input = document.getElementById('animDuration').value;
+  animationDuration = parseInt(input);
+}
+
+function setAnimThrottleDelay() {
+  var input = document.getElementById('animThrottleDelay').value;
+  animationDuration = parseInt(input);
+}
+
+function setShowReceived() {
+  displayReceived = document.getElementById('showReceived').checked;
+}
 
 (function() {
 
   var defaultColor = "black";
-
-  var animationDuration = 1500;
-  var errorDurationMultiplier = 1;
-  var receivedDurationMultiplier = 0.6;
-  var animationThrottleDelay = 500;
 
   var w = 1200,
       h = 600;
