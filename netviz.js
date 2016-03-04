@@ -21,12 +21,15 @@ var convertRouterId = function(agentId) {
   return [groupId, routerId];
 };
 
+var displayReceived = true;
+
 (function() {
 
   var defaultColor = "black";
 
   var animationDuration = 1500;
-  var animationMultiplier = 1.2;
+  var errorDurationMultiplier = 1;
+  var receivedDurationMultiplier = 0.6;
   var animationThrottleDelay = 500;
 
   var w = 1200,
@@ -123,6 +126,9 @@ var convertRouterId = function(agentId) {
         case 'packet':
           animatePacket(next);
           break;
+        case 'received':
+          displayReceived(next);
+          break;
         case 'error':
           displayError(next);
           break;
@@ -152,16 +158,57 @@ var convertRouterId = function(agentId) {
       }
     }
 
-    this.addError = function(source, label, color) {
+    this.addEvent = function(type, source, label, color) {
       animationQueue.push({
         source: source,
         label: label,
         color: color,
-        type: 'error',
+        type: type,
       });
       if (animationTimer === null) {
         animationTimer = setInterval(processAnimation, animationThrottleDelay);
       }
+    }
+
+    var displayReceived = function(err) {
+      var n1 = findNode(err.source);
+
+      var elems = [];
+      elems.push(svg.append("text")
+          .attr("x", n1.x + 20)
+          .attr("y", n1.y + 7)
+          .text(err.label));
+      elems.push(
+        svg.append("circle")
+          .attr("cx", n1.x)
+          .attr("cy", n1.y)
+          .attr("r", 5)
+          .style("fill", err.color));
+        
+      elems[0].transition()
+            .attrTween("x", function(d, i, a) {
+              return function(t) {
+                return n1.x + (50 * t) + 20;
+              }
+            })
+            .style("opacity",0)
+            .ease("quad")
+            .duration(animationDuration * receivedDurationMultiplier)
+            .each("end", function() {
+              d3.select(this).remove();
+            });
+      elems[1].transition()
+            .attrTween("cx", function(d, i, a) {
+              return function(t) {
+                return n1.x + (50 * t);
+              }
+            })
+            .style("opacity",0)
+            .ease("quad")
+            .duration(animationDuration * receivedDurationMultiplier)
+            .each("end", function() {
+              d3.select(this).remove();
+            });
     }
 
     var displayError = function(err) {
@@ -170,7 +217,7 @@ var convertRouterId = function(agentId) {
       var elems = [];
       elems.push(svg.append("text")
           .attr("x", n1.x + 20)
-          .attr("y", n1.y + 15)
+          .attr("y", n1.y + 10)
           .text(err.label));
       elems.push(
         svg.append("rect")
@@ -183,28 +230,24 @@ var convertRouterId = function(agentId) {
       elems[0].transition()
             .attrTween("y", function(d, i, a) {
               return function(t) {
-                if (t < 0.5) {
-                  return n1.y - (75 * t) + 10;
-                }
-                return n1.y - (75 * (1-t)) + 10;
+                return n1.y - (50 * t) + 10;
               }
             })
+            .style("opacity",0)
             .ease("quad")
-            .duration(animationDuration * animationMultiplier)
+            .duration(animationDuration * errorDurationMultiplier)
             .each("end", function() {
               d3.select(this).remove();
             });
       elems[1].transition()
             .attrTween("y", function(d, i, a) {
               return function(t) {
-                if (t < 0.5) {
-                  return n1.y - (75 * t);
-                }
-                return n1.y - (75 * (1-t));
+                return n1.y - (50 * t);
               }
             })
+            .style("opacity",0)
             .ease("quad")
-            .duration(animationDuration * animationMultiplier)
+            .duration(animationDuration * errorDurationMultiplier)
             .each("end", function() {
               d3.select(this).remove();
             });
@@ -415,7 +458,9 @@ var convertRouterId = function(agentId) {
         var color = entry.data.cell_type in packetColors
                     ? packetColors[entry.data.cell_type] : defaultColor;
         graph.addPacket(source, dest, entry.data.cell_type, color);
-        redrawNodes();
+      }
+      else if (displayReceived && entry.data.event === 'received') {
+        graph.addEvent('received', source, entry.data.cell_type, '#808000');
       }
     });
 
@@ -426,7 +471,7 @@ var convertRouterId = function(agentId) {
       graph.addNode(entry.router, sourceLabel[0] + "-" + sourceLabel[1]);
 
       if ('error' in entry.data) {
-        graph.addError(source, entry.data.error, "red");
+        graph.addEvent('error', source, entry.data.error, "red");
       }
     });
   }
