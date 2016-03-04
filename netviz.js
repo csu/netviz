@@ -463,6 +463,10 @@ var displayReceived = true;
       else if (displayReceived && entry.data.event === 'received') {
         graph.addEvent('received', source, entry.data.cell_type, '#808000');
       }
+      else if (entry.data.event == 'shutdown') {
+        graph.removeNode(source);
+        redrawNodes();
+      }
     });
 
     socket.on('error', function(entry) {
