@@ -12,7 +12,12 @@
   <div class="controls">
     <h3>Control Panel</h3>
     <form id="form" onsubmit="return false;">
-      Packet animation duration: <input type="text" id="animDuration" />
+      Animation duration: <br>
+      <input type="text" id="animDuration" />
+      <input type="submit" onclick="setAnimDuration();" value="Set" />
+      <br><br>
+      Animation throttle (delay between anims): <br>
+      <input type="text" id="animThrottleDelay" />
       <input type="submit" onclick="setAnimDuration();" value="Set" />
       <br><br>
       Show received packets: <input id="showReceived" name="showReceived" type="checkbox" onclick="setShowReceived()" />

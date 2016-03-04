@@ -28,11 +28,17 @@ var errorDurationMultiplier = 1;
 var receivedDurationMultiplier = 0.6;
 var animationThrottleDelay = 500;
 
+document.getElementById('animDuration').value = animationDuration;
+document.getElementById('animThrottleDelay').value = animationThrottleDelay;
 document.getElementById('showReceived').checked = displayReceived;
-document.getElementById('animDuration').value = animationDuration
 
 function setAnimDuration() {
   var input = document.getElementById('animDuration').value;
+  animationDuration = parseInt(input);
+}
+
+function setAnimThrottleDelay() {
+  var input = document.getElementById('animThrottleDelay').value;
   animationDuration = parseInt(input);
 }
 
