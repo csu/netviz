@@ -29,6 +29,7 @@ var convertRouterId = function(agentId) {
 };
 
 var displayReceived = true;
+var debugMode = false;
 
 var animationDuration = 1500;
 var errorDurationMultiplier = 1;
@@ -38,6 +39,7 @@ var animationThrottleDelay = 500;
 document.getElementById('animDuration').value = animationDuration;
 document.getElementById('animThrottleDelay').value = animationThrottleDelay;
 document.getElementById('showReceived').checked = displayReceived;
+document.getElementById('debugMode').checked = debugMode;
 
 function setAnimDuration() {
   var input = document.getElementById('animDuration').value;
@@ -51,6 +53,10 @@ function setAnimThrottleDelay() {
 
 function setShowReceived() {
   displayReceived = document.getElementById('showReceived').checked;
+}
+
+function setDebugMode() {
+  debugMode = document.getElementById('debugMode').checked;
 }
 
 (function() {
@@ -464,6 +470,10 @@ function setShowReceived() {
     var graph = new Graph("#network");
 
     socket.on('event', function(entry) {
+      if (debugMode) {
+        console.log(entry);
+      }
+
       // draw the node, if it doesn't exist already
       var source = entry.router;
       var sourceLabel = convertRouterId(source);
