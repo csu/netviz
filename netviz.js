@@ -1,3 +1,10 @@
+/*
+  netviz
+  Christopher Su
+*/
+
+// TODO: Abstract out animation of shapes and text from Graph (keep queue though)
+
 /* Tor61-specific */
 var packetColors = {
   "Create": "blue",
@@ -22,6 +29,7 @@ var convertRouterId = function(agentId) {
 };
 
 var displayReceived = true;
+var debugMode = false;
 
 var animationDuration = 1500;
 var errorDurationMultiplier = 1;
@@ -31,6 +39,7 @@ var animationThrottleDelay = 500;
 document.getElementById('animDuration').value = animationDuration;
 document.getElementById('animThrottleDelay').value = animationThrottleDelay;
 document.getElementById('showReceived').checked = displayReceived;
+document.getElementById('debugMode').checked = debugMode;
 
 function setAnimDuration() {
   var input = document.getElementById('animDuration').value;
@@ -44,6 +53,10 @@ function setAnimThrottleDelay() {
 
 function setShowReceived() {
   displayReceived = document.getElementById('showReceived').checked;
+}
+
+function setDebugMode() {
+  debugMode = document.getElementById('debugMode').checked;
 }
 
 (function() {
@@ -459,6 +472,10 @@ function setShowReceived() {
     var graph = new Graph("#network");
 
     socket.on('event', function(entry) {
+      if (debugMode) {
+        console.log(entry);
+      }
+
       // draw the node, if it doesn't exist already
       var source = entry.router;
       var sourceLabel = convertRouterId(source);
@@ -481,6 +498,10 @@ function setShowReceived() {
       }
       else if (displayReceived && entry.data.event === 'received') {
         graph.addEvent('received', source, entry.data.cell_type, '#808000');
+      }
+      else if (entry.data.event == 'shutdown') {
+        graph.removeNode(source);
+        redrawNodes();
       }
     });
 
