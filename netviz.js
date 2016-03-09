@@ -139,6 +139,8 @@ function setShowReceived() {
     };
 
     var processAnimation = function() {
+      // TODO: don't process animations while nodes are rearranging
+
       var next = animationQueue.shift();
       switch (next.type) {
         case 'packet':
