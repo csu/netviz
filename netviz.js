@@ -448,7 +448,7 @@ function setDebugMode() {
 
       force
         .gravity(.01)
-        .charge(-80000)
+        .charge(-120000)
         .friction(0)
         .linkDistance(function(d) { return d.value * 10 })
         .size([w, h])
