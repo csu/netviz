@@ -13,3 +13,6 @@ Alternatively, serve the file with an HTTP server. Python's built-in web server 
 
 * d3
 * jQuery
+
+## Examples
+The Tor61 network visualization uses Netviz to visualize data from logs streamed over Socket.IO.
