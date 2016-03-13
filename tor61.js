@@ -4,7 +4,13 @@
   Christopher Su
 */
 
+/*
+  Usage: change logServer to point to your log-server instance.
+*/
+
 // Constants and configuration
+var logServer = "http://log.461.dev.christopher.su";
+
 var packetColors = {
   "Create": "blue",
   "Created": "green",
@@ -221,7 +227,7 @@ var animateCell = function(data, viz) {
 
 // Tor61 visualization
 function tor61Visualization() {
-  var socket = io("http://log.461.dev.christopher.su");
+  var socket = io(logServer);
   var netviz = new Netviz("#network");
 
   // Listen for events over 
